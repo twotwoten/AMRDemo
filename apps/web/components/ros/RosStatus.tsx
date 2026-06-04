@@ -12,7 +12,7 @@ const labels: Record<string, { dot: string; text: string; tone: string }> = {
 export function RosStatus() {
   const status = useRosStore((s) => s.status)
   const lastError = useRosStore((s) => s.lastError)
-  const label = labels[status]
+  const label = labels[status] ?? labels.disconnected
 
   return (
     <span className={`flex items-center gap-1 text-sm ${label.tone}`} title={lastError ?? undefined}>

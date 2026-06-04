@@ -17,7 +17,7 @@ export const useRosStore = create<RosState>((set, get) => ({
   lastError: null,
 
   connect: (url: string) => {
-    if (get().ros) return
+    if (get().status !== "disconnected") return
     set({ status: "connecting", lastError: null })
 
     const ros = new Ros({ url })
