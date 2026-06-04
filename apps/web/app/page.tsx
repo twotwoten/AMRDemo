@@ -1,3 +1,5 @@
+import { RosStatus } from "@/components/ros/RosStatus"
+
 export default function DashboardPage() {
   return (
     <main className="min-h-screen bg-neutral-50 text-neutral-900">
@@ -7,7 +9,7 @@ export default function DashboardPage() {
           <span className="rounded bg-blue-500 px-2 py-0.5 font-mono text-xs text-white">
             SIM
           </span>
-          <span className="text-neutral-500">● Disconnected</span>
+          <RosStatus />
         </div>
       </header>
 
