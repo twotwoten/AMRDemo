@@ -1,0 +1,63 @@
+# Node / Next.js
+node_modules/
+.next/
+out/
+dist/
+build/
+.turbo/
+*.tsbuildinfo
+.pnpm-store/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.uv/
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+
+# ROS2
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Database / artifacts
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+apps/bridge/prisma/dev.db*
+
+# Runtime data (maps, logs, rosbags)
+~/.amrdetail/
+.amrdetail/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# OS
+desktop.ini
+$RECYCLE.BIN/
+
+# Logs
+*.log
+logs/
+
+# Test coverage
+coverage/
+.coverage
+htmlcov/
