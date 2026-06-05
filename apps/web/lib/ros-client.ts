@@ -1,4 +1,4 @@
-import { Ros, Topic } from "roslib"
+import { Ros, Topic, Message } from "roslib"
 import { create } from "zustand"
 
 export type ConnectionStatus = "disconnected" | "connecting" | "connected" | "error"
@@ -55,4 +55,27 @@ export function subscribeTopic<T>(
   const topic = new Topic({ ros, name, messageType })
   topic.subscribe((msg) => onMessage(msg as T))
   return () => topic.unsubscribe()
+}
+
+export interface Publisher<T> {
+  publish: (msg: T) => void
+  close: () => void
+}
+
+/**
+ * Create a publisher on the active rosbridge connection. Returns a no-op
+ * publisher if not connected yet.
+ */
+export function createPublisher<T extends Record<string, unknown>>(
+  name: string,
+  messageType: string,
+): Publisher<T> {
+  const ros = useRosStore.getState().ros
+  if (!ros) return { publish: () => {}, close: () => {} }
+
+  const topic = new Topic({ ros, name, messageType })
+  return {
+    publish: (msg: T) => topic.publish(new Message(msg)),
+    close: () => topic.unadvertise(),
+  }
 }
