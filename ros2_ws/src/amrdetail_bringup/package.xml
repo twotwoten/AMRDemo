@@ -10,6 +10,8 @@
 
   <exec_depend>turtlebot3_gazebo</exec_depend>
   <exec_depend>rosbridge_server</exec_depend>
+  <exec_depend>amrdetail_slam</exec_depend>
+  <exec_depend>amrdetail_safety</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
