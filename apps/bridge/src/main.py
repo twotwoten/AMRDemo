@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api import health
+from api import health, maps
 
 
 def create_app() -> FastAPI:
@@ -18,6 +18,7 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(health.router, tags=["system"])
+    app.include_router(maps.router)
     return app
 
 
