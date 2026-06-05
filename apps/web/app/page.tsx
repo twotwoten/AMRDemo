@@ -1,5 +1,7 @@
+import Link from "next/link"
 import { RosStatus } from "@/components/ros/RosStatus"
 import { OdomReadout } from "@/components/ros/OdomReadout"
+import { ActiveMapCard } from "@/components/map/ActiveMapCard"
 
 export default function DashboardPage() {
   return (
@@ -17,16 +19,24 @@ export default function DashboardPage() {
       <section className="grid grid-cols-1 gap-4 p-6 md:grid-cols-2">
         <div className="rounded-lg border border-neutral-200 bg-white p-4">
           <h2 className="mb-2 text-sm font-medium text-neutral-500">현재 맵</h2>
-          <p className="text-neutral-400">아직 생성된 맵이 없습니다.</p>
+          <ActiveMapCard />
         </div>
 
         <div className="rounded-lg border border-neutral-200 bg-white p-4">
           <h2 className="mb-2 text-sm font-medium text-neutral-500">빠른 작업</h2>
           <ul className="space-y-1 text-sm">
-            <li>🗺️ 새 맵 만들기 (Milestone 1B)</li>
-            <li>🎯 자율주행 시작 (Milestone 1C)</li>
-            <li>📋 미션 히스토리 (Milestone 1C)</li>
-            <li>⚙️ 시스템 진단 (Milestone 1D)</li>
+            <li>
+              <Link href="/map/new" className="text-blue-600 hover:underline">
+                🗺️ 새 맵 만들기
+              </Link>
+            </li>
+            <li>
+              <Link href="/maps" className="text-blue-600 hover:underline">
+                🗂️ 맵 관리
+              </Link>
+            </li>
+            <li className="text-neutral-400">🎯 자율주행 시작 (Milestone 1C)</li>
+            <li className="text-neutral-400">📋 미션 히스토리 (Milestone 1C)</li>
           </ul>
         </div>
 
