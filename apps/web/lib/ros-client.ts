@@ -1,4 +1,4 @@
-import { Ros, Topic, Message } from "roslib"
+import { Ros, Topic } from "roslib"
 import { create } from "zustand"
 
 export type ConnectionStatus = "disconnected" | "connecting" | "connected" | "error"
@@ -75,7 +75,9 @@ export function createPublisher<T extends Record<string, unknown>>(
 
   const topic = new Topic({ ros, name, messageType })
   return {
-    publish: (msg: T) => topic.publish(new Message(msg)),
+    // roslib serializes the plain object; cast to its Message param type.
+    publish: (msg: T) =>
+      topic.publish(msg as unknown as Parameters<typeof topic.publish>[0]),
     close: () => topic.unadvertise(),
   }
 }
