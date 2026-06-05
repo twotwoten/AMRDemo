@@ -1,4 +1,5 @@
 import { RosStatus } from "@/components/ros/RosStatus"
+import { OdomReadout } from "@/components/ros/OdomReadout"
 
 export default function DashboardPage() {
   return (
@@ -31,9 +32,7 @@ export default function DashboardPage() {
 
         <div className="rounded-lg border border-neutral-200 bg-white p-4 md:col-span-2">
           <h2 className="mb-2 text-sm font-medium text-neutral-500">시스템 상태</h2>
-          <p className="text-neutral-400">
-            ROS 연결 정보는 Task 4 이후에 표시됩니다.
-          </p>
+          <OdomReadout />
         </div>
       </section>
     </main>

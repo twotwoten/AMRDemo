@@ -1,4 +1,4 @@
-import { Ros } from "roslib"
+import { Ros, Topic } from "roslib"
 import { create } from "zustand"
 
 export type ConnectionStatus = "disconnected" | "connecting" | "connected" | "error"
@@ -37,3 +37,22 @@ export const useRosStore = create<RosState>((set, get) => ({
     set({ ros: null, status: "disconnected" })
   },
 }))
+
+export type Unsubscribe = () => void
+
+/**
+ * Subscribe to a ROS2 topic through the active rosbridge connection.
+ * Returns a no-op unsubscribe if no connection is established yet.
+ */
+export function subscribeTopic<T>(
+  name: string,
+  messageType: string,
+  onMessage: (msg: T) => void,
+): Unsubscribe {
+  const ros = useRosStore.getState().ros
+  if (!ros) return () => {}
+
+  const topic = new Topic({ ros, name, messageType })
+  topic.subscribe((msg) => onMessage(msg as T))
+  return () => topic.unsubscribe()
+}
