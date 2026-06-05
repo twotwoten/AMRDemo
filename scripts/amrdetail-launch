@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+# AMRDetail launcher: starts the full sim or real stack.
+# Usage:
+#   amrdetail-launch sim   # Gazebo + rosbridge + FastAPI + Next.js
+#   amrdetail-launch real  # (Milestone 1B) TurtleBot bringup + ...
+
+set -euo pipefail
+
+MODE="${1:-}"
+if [[ "$MODE" != "sim" && "$MODE" != "real" ]]; then
+  echo "Usage: amrdetail-launch <sim|real>" >&2
+  exit 64
+fi
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$REPO_ROOT"
+
+# Load .env.local if present
+if [[ -f .env.local ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source .env.local
+  set +a
+fi
+
+export ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-30}"
+export TURTLEBOT3_MODEL="${TURTLEBOT3_MODEL:-waffle_pi}"
+# Bridge port (override if 8000 is taken, e.g. BRIDGE_PORT=8010)
+BRIDGE_PORT="${BRIDGE_PORT:-8000}"
+
+# DDS / RMW selection is mode-specific:
+#   sim  -> single host (localhost). Default rmw_fastrtps_cpp is the most
+#           robust here; forcing CycloneDDS has been observed to crash
+#           gazebo_ros node init under WSL. Cyclone's unicast config buys
+#           nothing on one host, so we use the default.
+#   real -> multi-host over WiFi. Use CycloneDDS with the static unicast
+#           config in configs/cyclonedds.xml to avoid multicast discovery
+#           flakiness (see design doc 3.2).
+if [[ "$MODE" == "real" ]]; then
+  export RMW_IMPLEMENTATION="${RMW_IMPLEMENTATION:-rmw_cyclonedds_cpp}"
+  export CYCLONEDDS_URI="file://$REPO_ROOT/configs/cyclonedds.xml"
+else
+  # Force fastrtps for sim even if .env.local set CycloneDDS — sim must just work.
+  export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+  unset CYCLONEDDS_URI
+fi
+
+# Source ROS2 + workspace.
+# ROS setup scripts reference unbound vars, so relax nounset while sourcing.
+set +u
+# shellcheck disable=SC1091
+source /opt/ros/humble/setup.bash
+if [[ -f "$REPO_ROOT/ros2_ws/install/setup.bash" ]]; then
+  # shellcheck disable=SC1091
+  source "$REPO_ROOT/ros2_ws/install/setup.bash"
+else
+  set -u
+  echo "Workspace not built yet. Run: (cd ros2_ws && colcon build)" >&2
+  exit 1
+fi
+set -u
+
+declare -a PIDS=()
+cleanup() {
+  echo
+  echo "Stopping AMRDetail processes…"
+  for pid in "${PIDS[@]}"; do
+    if kill -0 "$pid" 2>/dev/null; then
+      kill "$pid" 2>/dev/null || true
+    fi
+  done
+  wait 2>/dev/null || true
+}
+trap cleanup EXIT INT TERM
+
+start() {
+  local label="$1"; shift
+  echo "[$label] starting: $*"
+  ( "$@" ) &
+  PIDS+=("$!")
+}
+
+case "$MODE" in
+  sim)
+    start ros2  ros2 launch amrdetail_bringup sim.launch.py
+    start bridge bash -c "cd apps/bridge && uv run uvicorn main:app --app-dir src --host 0.0.0.0 --port $BRIDGE_PORT"
+    start web    bash -c "cd apps/web && pnpm dev"
+    ;;
+  real)
+    echo "real mode arrives in Milestone 1B." >&2
+    exit 65
+    ;;
+esac
+
+echo
+echo "AMRDetail $MODE stack is running. Open http://localhost:3000"
+echo "Press Ctrl+C to stop."
+wait
