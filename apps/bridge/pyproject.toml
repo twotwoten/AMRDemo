@@ -9,6 +9,8 @@ dependencies = [
   "pydantic>=2.9",
   "structlog>=24.4",
   "prisma>=0.15",
+  "pillow>=10.4",
+  "pyyaml>=6.0",
 ]
 
 [dependency-groups]
